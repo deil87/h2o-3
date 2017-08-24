@@ -13,7 +13,6 @@ public class DeeplearningMojoModel extends MojoModel {
   public double[] _normrespmul;
   public double[] _normrespsub;
   public boolean _use_all_factor_levels;
-  public boolean _standardize;
   public String _activation;
   public boolean _imputeMeans;
   public int[] _units;  // size of neural network, input, hidden layers and output layer
@@ -41,12 +40,12 @@ public class DeeplearningMojoModel extends MojoModel {
   @Override
   public final double[] score0(double[] dataRow, double offset, double[] preds) {
     assert(dataRow != null) : "doubles are null"; // check to make sure data is not null
+    float[] input2Neurons = new float[_units[0]];
 
-    if (_standardize || _imputeMeans) { // impute missing values or standardize
-      preprocessData(dataRow, _normsub, _normmul, _catNAFill, _imputeMeans, _standardize);
-    }
+    // transform inputs: standardize if needed, imputeMissings, convert categoricals
+    setInput(dataRow, input2Neurons, _nums, _cats, _catoffsets, _normmul, _normsub, _use_all_factor_levels, !_imputeMeans);
 
-    // transform inputs using one-hot-encoding
+
     float[] floats;
 
     return preds;

@@ -22,7 +22,6 @@ public class DeeplearningMojoReader extends ModelMojoReader<DeeplearningMojoMode
     _model._normrespmul = readkv("norm_resp_mul");
     _model._normrespsub = readkv("norm_resp_sub");
     _model._use_all_factor_levels = readkv("use_all_factor_levels");
-    _model._standardize = readkv("standardize");
     _model._activation = readkv("activation");
     _model._imputeMeans = readkv("mean_imputation");
     if (_model._imputeMeans & (_model._cats > 0)) {

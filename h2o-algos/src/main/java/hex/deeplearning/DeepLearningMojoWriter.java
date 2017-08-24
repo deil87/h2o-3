@@ -41,7 +41,6 @@ public class DeepLearningMojoWriter extends ModelMojoWriter<DeepLearningModel,
     writekv("norm_resp_mul", _model_info.data_info._normRespMul);
     writekv("norm_resp_sub", _model_info.data_info._normRespSub);
     writekv("use_all_factor_levels", _parms._use_all_factor_levels);
-    writekv("standardize", _parms._standardize);  // check if need to standardize input
     writekv("activation", _parms._activation);
     boolean imputeMeans=_parms._missing_values_handling.equals(DeepLearningModel.DeepLearningParameters.MissingValuesHandling.MeanImputation);
     writekv("mean_imputation", imputeMeans);
