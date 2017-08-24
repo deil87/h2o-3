@@ -35,17 +35,14 @@ public class DeepLearningMojoWriter extends ModelMojoWriter<DeepLearningModel,
     writekv("mini_batch_size", _parms._mini_batch_size);
     writekv("nums", _model_info.data_info._nums);
     writekv("cats", _model_info.data_info._cats);
-    writekv("cat_offsets", _output.catoffsets);
-    writekv("norm_mul", _output.normmul);
-    writekv("norm_sub", _output.normsub);
-    writekv("norm_resp_mul", _output.normrespmul);
-    writekv("norm_resp_sub", _output.normrespsub);
+    writekv("cat_offsets", _model_info.data_info._catOffsets);
+    writekv("norm_mul", _model_info.data_info()._normMul);
+    writekv("norm_sub", _model_info.data_info()._normSub);
+    writekv("norm_resp_mul", _model_info.data_info._normRespMul);
+    writekv("norm_resp_sub", _model_info.data_info._normRespSub);
     writekv("use_all_factor_levels", _parms._use_all_factor_levels);
     writekv("standardize", _parms._standardize);  // check if need to standardize input
-    writekv("hidden", _parms._hidden);
     writekv("activation", _parms._activation);
-    writekv("input_dropout_ratio", _parms._input_dropout_ratio);
-    writekv("hidden_dropout_ratio", _parms._hidden_dropout_ratios);
     boolean imputeMeans=_parms._missing_values_handling.equals(DeepLearningModel.DeepLearningParameters.MissingValuesHandling.MeanImputation);
     writekv("mean_imputation", imputeMeans);
     if (imputeMeans && _model_info.data_info._cats>0) { // only add this if there are categorical columns
@@ -55,8 +52,6 @@ public class DeepLearningMojoWriter extends ModelMojoWriter<DeepLearningModel,
     // keep track of neuron network sizes, weights and biases. Layer 0 is the output layer.  Last layer is output layer
     int numberOfWeights = 1+_parms._hidden.length;
     double[] all_drop_out_ratios = new double[numberOfWeights];
-    String[] weightKey = new String[numberOfWeights];
-    String[] biasKey = new String[numberOfWeights];
 
     for (int index = 0; index < numberOfWeights; index++) {
       if (index==0) { // input layer
@@ -70,10 +65,9 @@ public class DeepLearningMojoWriter extends ModelMojoWriter<DeepLearningModel,
       }
 
       //generate hash key to store weights/bias of all layers
-      weightKey[index] = "weight_layer"+index;
-      writekv(weightKey[index], _model_info.get_weights(index).raw());
-      biasKey[index] = "bias_layer"+index;
-      writekv(biasKey[index], _model_info.get_biases(index).raw());
+      writekv("weight_layer"+index, _model_info.get_weights(index).raw());
+      writekv("bias_layer"+index, _model_info.get_biases(index).raw());
     }
+    writekv("all_drop_out_ratios", all_drop_out_ratios);
   }
 }

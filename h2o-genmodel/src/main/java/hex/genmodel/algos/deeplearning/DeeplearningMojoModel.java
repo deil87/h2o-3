@@ -4,6 +4,24 @@ import hex.genmodel.MojoModel;
 
 public class DeeplearningMojoModel extends MojoModel {
 
+  public int _mini_batch_size;
+  public int _nums; // number of numerical columns
+  public int _cats; // number of categorical columns
+  public int[] _catoffsets;
+  public double[] _normmul;
+  public double[] _normsub;
+  public double[] _normrespmul;
+  public double[] _normrespsub;
+  public boolean _use_all_factor_levels;
+  public boolean _standardize;
+  public String _activation;
+  public boolean _imputeMeans;
+  public int[] _units;  // size of neural network, input, hidden layers and output layer
+  public double[] _all_drop_out_ratios; // input layer and hidden layers
+  public StoreWeightsBias[] _weights; // stores weights of different layers
+  public StoreWeightsBias[] _bias;    // store bias of different layers
+  public int[] _catNAFill; // if mean imputation is true, mode imputation for categorical columns
+
   /***
    * Should set up the neuron network frame work here
    * @param columns
@@ -15,14 +33,20 @@ public class DeeplearningMojoModel extends MojoModel {
 
   /***
    * This method will be derived from the scoring/prediction function of deeplearning model itself.
-   * @param doubles
+   * @param dataRow
    * @param offset
    * @param preds
    * @return
    */
   @Override
-  public final double[] score0(double[] doubles, double offset, double[] preds) {
-    assert(doubles != null) : "doubles are null";
+  public final double[] score0(double[] dataRow, double offset, double[] preds) {
+    assert(dataRow != null) : "doubles are null"; // check to make sure data is not null
+
+    if (_standardize || _imputeMeans) { // impute missing values or standardize
+      preprocessData(dataRow, _normsub, _normmul, _catNAFill, _imputeMeans, _standardize);
+    }
+
+    // transform inputs using one-hot-encoding
     float[] floats;
 
     return preds;
@@ -31,5 +55,14 @@ public class DeeplearningMojoModel extends MojoModel {
   @Override
   public double[] score0(double[] row, double[] preds) {
     return score0(row, 0.0, preds);
+  }
+
+  // class to store weight or bias for one neuron layer
+  public static class StoreWeightsBias {
+    double[] _wOrBValues; // store weight or bias arrays
+
+    StoreWeightsBias(double[] values) {
+      _wOrBValues = values;
+    }
   }
 }

@@ -333,6 +333,31 @@ public abstract class GenModel implements IGenModel, IGeneratedModel, Serializab
     return (idx >= 0 && idx < nbits);
   }
 
+  public static void preprocessData(double[] data, double[] means, double[] mults, int[] modes, boolean imputeMissing,
+                                    boolean standardize) {
+    for (int i = 0; i < data.length; i++) {  // for each input feature
+      data[i] = preprocessData(data[i], i, means, mults, modes, imputeMissing, standardize);
+    }
+  }
+
+  public static double preprocessData(double d, int i, double [] means, double [] mults, int[] modes,
+                                      boolean imputeMissing, boolean standardize){
+    if (i >= modes.length) { // numerical column here
+      i = i-modes.length;
+      if (Double.isNaN(d) & imputeMissing) {
+        d = means[i];
+      } else if (standardize) {
+        d -= means[i];
+        d *= mults[i];
+      }
+    } else {  // categorical column here
+      if (Double.isNaN(d) & imputeMissing) {
+        d = modes[i];
+      }
+    }
+    return d;
+  }
+
   // Todo: Done for K-means but we should really unify for all models.
   public static void Kmeans_preprocessData(double [] data, double [] means, double [] mults, int[] modes){
     for(int i = 0; i < data.length; i++) {
