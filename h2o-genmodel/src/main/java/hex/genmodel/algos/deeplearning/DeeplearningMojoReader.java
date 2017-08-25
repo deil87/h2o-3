@@ -35,11 +35,13 @@ public class DeeplearningMojoReader extends ModelMojoReader<DeeplearningMojoMode
     _model._bias = new DeeplearningMojoModel.StoreWeightsBias[numLayers];
     _model._weights = new DeeplearningMojoModel.StoreWeightsBias[numLayers];
     for (int layerIndex = 0; layerIndex < numLayers; layerIndex++) {
-      double[] temp = readkv("bias_layer"+layerIndex);
+      float[] temp = readkv("bias_layer"+layerIndex);
       _model._bias[layerIndex] = new DeeplearningMojoModel.StoreWeightsBias(temp);
       temp = readkv("weight_layer"+layerIndex);
       _model._weights[layerIndex] = new DeeplearningMojoModel.StoreWeightsBias(temp);
     }
+
+    _model.init();
   }
 
   @Override
