@@ -1,5 +1,6 @@
 package hex.genmodel.algos.deeplearning;
 
+import hex.genmodel.GenModel;
 import hex.genmodel.MojoModel;
 
 public class DeeplearningMojoModel extends MojoModel {
@@ -34,10 +35,10 @@ public class DeeplearningMojoModel extends MojoModel {
   public void init() {
     _numLayers = _units.length-1;
     _allActivations = new String[_numLayers];
-    for (int index=0; index < (_numLayers-1); index++)
+    int inputLayers = _numLayers-1;
+    for (int index=0; index < (inputLayers); index++)
       _allActivations[index]=_activation;
-    _allActivations[-1] = this.isClassifier()?"Softmax":"Linear";
-
+    _allActivations[inputLayers] = this.isClassifier()?"Softmax":"Linear";
   }
 
   /***
@@ -53,22 +54,76 @@ public class DeeplearningMojoModel extends MojoModel {
     assert(dataRow != null) : "doubles are null"; // check to make sure data is not null
     float[] input2Neurons = new float[_units[0]]; // store inputs into the neural network
     double[] neuronsOutput;  // save output from a neural network layer
+    double[] neuronsInput;    // store input to neural network layer
 
     // transform inputs: standardize if needed, imputeMissings, convert categoricals
     setInput(dataRow, input2Neurons, _nums, _cats, _catoffsets, _normmul, _normsub, _use_all_factor_levels, !_imputeMeans);
+    if (_imputeMeans) {
+      neuronsInput = imputeMissingWithMeans(input2Neurons);
+    } else {
+      neuronsInput = convertFloat2Double(input2Neurons);
+    }
 
     // proprogate inputs through neural network
     for (int layer=0; layer < _numLayers; layer++) {
       NeuralNetwork oneLayer = new NeuralNetwork(_allActivations[layer], _all_drop_out_ratios[layer], _weights[layer],
-              _bias[layer], input2Neurons, _units[layer+1]);
+              _bias[layer], neuronsInput, _units[layer+1]);
       neuronsOutput = oneLayer.fprop1Layer();
-
-
+      neuronsInput = neuronsOutput;
     }
-
+    assert(_nclasses == neuronsInput.length) : "nclasses " + _nclasses + " neuronsOutput.length " + neuronsInput.length;
     // Correction for classification or standardize outputs
-
+    if (this.isClassifier()) {
+    for (int i = 0; i < neuronsInput.length; ++i)
+      preds[1 + i] = neuronsInput[i];
+    if (_balanceClasses)
+      GenModel.correctProbabilities(preds, _priorClassDistrib, _modelClassDistrib);
+    preds[0] = GenModel.getPrediction(preds, _priorClassDistrib, dataRow, _defaultThreshold);
+  } else {
+    if (_normrespmul!=null && _normrespsub!=null)
+      preds[0] = neuronsInput[0] * _normrespmul[0] + _normrespsub[0];
+    else
+      preds[0] = neuronsInput[0];
+  }
     return preds;
+  }
+
+  /***
+   * replace the missing numerical columns with column mean.
+   * @param input
+   * @return
+   */
+  private double[] imputeMissingWithMeans(float[] input) {
+    double[] out = new double[input.length];
+    int catNum = input.length-_nums;
+
+    for (int index = 0; index < catNum; index++) {
+      out[index] = (double) input[index];
+    }
+    if (_normsub != null) {
+      for (int index = catNum; index < input.length; index++) {
+        if (Double.isNaN(input[index]))
+          out[index] = _normsub[index-catNum];
+        else
+          out[index] = (double) input[index];
+      }
+    } else {
+      for (int index = catNum; index < input.length; index++) {
+        if (Double.isNaN(input[index]))
+          out[index] = 0.0;
+        else
+          out[index] = (double) input[index];
+      }
+    }
+    return out;
+  }
+
+  public static double[] convertFloat2Double(float[] input) {
+    int arraySize = input.length;
+    double[] output = new double[arraySize];
+    for (int index=0; index<arraySize; index++)
+      output[index] = (double) input[index];
+    return output;
   }
 
   public double[] fprop(float[] input2Neurons) {

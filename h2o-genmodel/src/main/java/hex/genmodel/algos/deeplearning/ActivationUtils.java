@@ -8,32 +8,7 @@ public class ActivationUtils {
     double[] eval(double[] x, double drop_out_ratio, int maxOutk);  // for MaxoutDropout
   }
 
-  public ActivationFunctions createActFuns(String activation) {
-    switch (activation) {
-      case "Linear":
-        return new LinearOut();
-      case "Softmax":
-        return new SoftmaxOut();
-      case "ExpRectifierDropout":
-        return new ExpRectifierDropoutOut();
-      case "ExpRectifier":
-        return new ExpRectifierOut();
-      case "Rectifier":
-        return new RectifierOut();
-      case "RectifierDropout":
-        return new RectifierDropoutOut();
-      case "MaxoutDropout":
-        return new MaxoutDropoutOut();
-      case "Maxout":
-        return new MaxoutOut();
-      case "TanhDropout":
-        return new TanhDropoutOut();
-      case "Tanh":
-        return new TanhOut();
-      default:
-        throw new UnsupportedOperationException("Unexpected activation function: " + activation);
-    }
-  }
+
 
   public static class LinearOut implements ActivationFunctions {
     public double[] eval(double[] input, double drop_out_ratio, int maxOutk) {  // do nothing
@@ -46,9 +21,10 @@ public class ActivationUtils {
       int nodeSize = input.length;
       double[] output = new double[nodeSize];
       double scaling = 0;
+      double max = maxArray(input);
 
       for (int index = 0; index < nodeSize; index++) {
-        output[index] =  Math.exp(input[index]);
+        output[index] =  Math.exp(input[index]-max);
         scaling += output[index];
       }
 
@@ -59,6 +35,15 @@ public class ActivationUtils {
     }
   }
 
+  public static double maxArray(double[] input) {
+    assert ((input != null) && (input.length > 0)) : "Your array is empty.";
+
+    double temp = input[0];
+    for (int index = 0; index < input.length; index++)
+      temp = temp<input[index]?input[index]:temp;
+
+    return temp;
+  }
   public static class ExpRectifierDropoutOut extends ExpRectifierOut {
     public double[] eval(double[] input, double drop_out_ratio, int maxOutk) {
       double[] output = super.eval(input, drop_out_ratio, maxOutk);

@@ -543,7 +543,7 @@ public abstract class GenModel implements IGenModel, IGeneratedModel, Serializab
       to[_catOffsets[_cats] + i] = Double.isNaN(nums[i]) ? (replaceMissingWithZero ? 0 : Float.NaN) : nums[i];
   }
 
-  public static void img2pixels(BufferedImage img, int w, int h, int channels, float[] pixels, int start, float[] mean) throws IOException {
+   public static void img2pixels(BufferedImage img, int w, int h, int channels, float[] pixels, int start, float[] mean) throws IOException {
     // resize the image
     BufferedImage scaledImg = new BufferedImage(w, h, img.getType());
     Graphics2D g2d = scaledImg.createGraphics();

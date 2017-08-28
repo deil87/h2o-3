@@ -3,20 +3,23 @@ package hex.genmodel.algos.deeplearning;
 import java.util.Arrays;
 import java.util.List;
 
+import static hex.genmodel.algos.deeplearning.ActivationUtils.*;
+
 public class NeuralNetwork {  // represent one layer of neural network
   public String _activation;    // string that describe the activation function
   double _drop_out_ratio;              // drop_out_ratio for that layer
   public DeeplearningMojoModel.StoreWeightsBias _weights;  // store layer weight
   public DeeplearningMojoModel.StoreWeightsBias _bias;      // store layer bias
-  public float[] _inputs;     // store input to layer
+  public double[] _inputs;     // store input to layer
   public double[] _outputs;    // layer output
   public int _outSize;         // number of nodes in this layer
   public int _inSize;         // number of inputs to this layer
+  public int _maxK=1;
   List<String> _validActivation = Arrays.asList("Linear", "Softmax", "ExpRectifierDropout", "ExpRectifier",
           "Rectifier", "RectifierDropout", "MaxoutDropout", "Maxout", "TanhDropout", "Tanh");
 
   public NeuralNetwork(String activation, double drop_out_ratio, DeeplearningMojoModel.StoreWeightsBias weights,
-                       DeeplearningMojoModel.StoreWeightsBias bias, float[] inputs, int outSize) {
+                       DeeplearningMojoModel.StoreWeightsBias bias, double[] inputs, int outSize) {
     validateInputs(activation, drop_out_ratio, weights._wOrBValues.length, bias._wOrBValues.length, inputs.length,
             outSize);
     _activation=activation;
@@ -27,22 +30,24 @@ public class NeuralNetwork {  // represent one layer of neural network
     _outSize=outSize;
     _inSize=_inputs.length;
     _outputs = new double[_outSize];
+    if ("MaxoutDropout".equals(_activation) || "MaxoutDropout".equals(_activation)) {
+      _maxK = bias._wOrBValues.length/(inputs.length*outSize);
+    }
   }
 
   public double[] fprop1Layer() {
     double[] input2ActFun = formNNInputs();
-
-    // apply activation function to form NN outputs
-    return _outputs;
+    ActivationFunctions createActivations = createActFuns(_activation); // choose activation function
+    return createActivations.eval(input2ActFun, _drop_out_ratio, _maxK); // apply activation function to form NN outputs
   }
 
   public double[] formNNInputs() {
-    double[] input2ActFun = new double[_inSize];
+    double[] input2ActFun = new double[_outSize];
 
     for (int row=0; row < _outSize; row++) {
       input2ActFun[row] = _bias._wOrBValues[row];  //
       for (int col=0; col < _inSize; col++) {
-        input2ActFun[row] += _weights._wOrBValues[row * _outSize+col];
+        input2ActFun[row] += _inputs[col]*_weights._wOrBValues[row * _inSize+col];
       }
     }
     return input2ActFun;
@@ -54,12 +59,39 @@ public class NeuralNetwork {  // represent one layer of neural network
             "\"ExpRectifierDropout\", \"ExpRectifier\", \"Rectifier\", \"RectifierDropout\", \"MaxoutDropout\", " +
             "\"Maxout\", \"TanhDropout\", \"Tanh\"";
     // use mod to take care of Maxout networks
-    assert ((inSize * outSize) % weightLen == 0) : "Your neural network layer number of input * number " +
+    assert (weightLen % (inSize * outSize) == 0) : "Your neural network layer number of input * number " +
             "of outputs should equal length of your weight vector";
     assert ((outSize % biasLen) == 0) : "Number of bias should equal number of nodes in your nerual network" +
             " layer.";
     assert (drop_out_ratio >= 0 && drop_out_ratio < 1) : "drop_out_ratio must be >=0 and < 1.";
     assert (outSize > 0) : "number of nodes in neural network must exceed 0.";
 
+  }
+
+  public ActivationFunctions createActFuns(String activation) {
+    switch (activation) {
+      case "Linear":
+        return new LinearOut();
+      case "Softmax":
+        return new SoftmaxOut();
+      case "ExpRectifierDropout":
+        return new ExpRectifierDropoutOut();
+      case "ExpRectifier":
+        return new ExpRectifierOut();
+      case "Rectifier":
+        return new RectifierOut();
+      case "RectifierDropout":
+        return new RectifierDropoutOut();
+      case "MaxoutDropout":
+        return new MaxoutDropoutOut();
+      case "Maxout":
+        return new MaxoutOut();
+      case "TanhDropout":
+        return new TanhDropoutOut();
+      case "Tanh":
+        return new TanhOut();
+      default:
+        throw new UnsupportedOperationException("Unexpected activation function: " + activation);
+    }
   }
 }
