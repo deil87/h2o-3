@@ -212,10 +212,11 @@ public class StackedEnsembleTest extends TestUtil {
                 stackedEnsembleModel.remove();
                 stackedEnsembleModel._output._metalearner._output._training_metrics.remove();
                 stackedEnsembleModel._output._metalearner.remove();
+                if(stackedEnsembleModel._output._level_one_frame != null){
+                    stackedEnsembleModel._output._level_one_frame.remove();
+                }
             }
-
             Scope.exit();
         }
     }
-
 }
