@@ -9,7 +9,7 @@ public class NeuralNetwork {  // represent one layer of neural network
   public DeeplearningMojoModel.StoreWeightsBias _weights;  // store layer weight
   public DeeplearningMojoModel.StoreWeightsBias _bias;      // store layer bias
   public float[] _inputs;     // store input to layer
-  public float[] _outputs;    // layer output
+  public double[] _outputs;    // layer output
   public int _outSize;         // number of nodes in this layer
   public int _inSize;         // number of inputs to this layer
   List<String> _validActivation = Arrays.asList("Linear", "Softmax", "ExpRectifierDropout", "ExpRectifier",
@@ -26,18 +26,18 @@ public class NeuralNetwork {  // represent one layer of neural network
     _inputs=inputs;
     _outSize=outSize;
     _inSize=_inputs.length;
-    _outputs = new float[_outSize];
+    _outputs = new double[_outSize];
   }
 
-  public float[] fprop1Layer() {
-    float[] input2ActFun = formNNInputs();
+  public double[] fprop1Layer() {
+    double[] input2ActFun = formNNInputs();
 
     // apply activation function to form NN outputs
     return _outputs;
   }
 
-  public float[] formNNInputs() {
-    float[] input2ActFun = new float[_inSize];
+  public double[] formNNInputs() {
+    double[] input2ActFun = new double[_inSize];
 
     for (int row=0; row < _outSize; row++) {
       input2ActFun[row] = _bias._wOrBValues[row];  //
@@ -50,14 +50,16 @@ public class NeuralNetwork {  // represent one layer of neural network
 
   public void validateInputs(String activation, double drop_out_ratio, int weightLen, int biasLen, int inSize,
                              int outSize) {
-    assert inSize*outSize == weightLen : "Your neural network layer number of input * number " +
-            "of outputs should equal length of your weight vector";
-    assert outSize == biasLen : "Number of bias should equal number of nodes in your nerual network" +
-            " layer.";
-    assert (drop_out_ratio>=0 && drop_out_ratio<1) : "drop_out_ratio must be >=0 and < 1.";
-    assert(outSize > 0) : "number of nodes in neural network must exceed 0.";
     assert (_validActivation.contains(activation)) : "activation must be one of \"Linear\", \"Softmax\", " +
             "\"ExpRectifierDropout\", \"ExpRectifier\", \"Rectifier\", \"RectifierDropout\", \"MaxoutDropout\", " +
             "\"Maxout\", \"TanhDropout\", \"Tanh\"";
+    // use mod to take care of Maxout networks
+    assert ((inSize * outSize) % weightLen == 0) : "Your neural network layer number of input * number " +
+            "of outputs should equal length of your weight vector";
+    assert ((outSize % biasLen) == 0) : "Number of bias should equal number of nodes in your nerual network" +
+            " layer.";
+    assert (drop_out_ratio >= 0 && drop_out_ratio < 1) : "drop_out_ratio must be >=0 and < 1.";
+    assert (outSize > 0) : "number of nodes in neural network must exceed 0.";
+
   }
 }

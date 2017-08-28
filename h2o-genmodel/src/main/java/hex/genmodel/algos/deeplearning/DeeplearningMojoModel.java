@@ -52,7 +52,7 @@ public class DeeplearningMojoModel extends MojoModel {
   public final double[] score0(double[] dataRow, double offset, double[] preds) {
     assert(dataRow != null) : "doubles are null"; // check to make sure data is not null
     float[] input2Neurons = new float[_units[0]]; // store inputs into the neural network
-    float[] neuronsOutput;  // save output from a neural network layer
+    double[] neuronsOutput;  // save output from a neural network layer
 
     // transform inputs: standardize if needed, imputeMissings, convert categoricals
     setInput(dataRow, input2Neurons, _nums, _cats, _catoffsets, _normmul, _normsub, _use_all_factor_levels, !_imputeMeans);
@@ -86,9 +86,9 @@ public class DeeplearningMojoModel extends MojoModel {
 
   // class to store weight or bias for one neuron layer
   public static class StoreWeightsBias {
-    float[] _wOrBValues; // store weight or bias arrays
+    double[] _wOrBValues; // store weight or bias arrays
 
-    StoreWeightsBias(float[] values) {
+    StoreWeightsBias(double[] values) {
       _wOrBValues = values;
     }
   }
