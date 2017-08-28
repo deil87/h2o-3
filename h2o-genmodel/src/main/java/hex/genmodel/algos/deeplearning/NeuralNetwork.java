@@ -15,8 +15,8 @@ public class NeuralNetwork {  // represent one layer of neural network
   public int _outSize;         // number of nodes in this layer
   public int _inSize;         // number of inputs to this layer
   public int _maxK=1;
-  List<String> _validActivation = Arrays.asList("Linear", "Softmax", "ExpRectifierDropout", "ExpRectifier",
-          "Rectifier", "RectifierDropout", "MaxoutDropout", "Maxout", "TanhDropout", "Tanh");
+  List<String> _validActivation = Arrays.asList("Linear", "Softmax", "ExpRectifierWithDropout", "ExpRectifier",
+          "Rectifier", "RectifierWithDropout", "MaxoutWithDropout", "Maxout", "TanhWithDropout", "Tanh");
 
   public NeuralNetwork(String activation, double drop_out_ratio, DeeplearningMojoModel.StoreWeightsBias weights,
                        DeeplearningMojoModel.StoreWeightsBias bias, double[] inputs, int outSize) {
@@ -56,8 +56,8 @@ public class NeuralNetwork {  // represent one layer of neural network
   public void validateInputs(String activation, double drop_out_ratio, int weightLen, int biasLen, int inSize,
                              int outSize) {
     assert (_validActivation.contains(activation)) : "activation must be one of \"Linear\", \"Softmax\", " +
-            "\"ExpRectifierDropout\", \"ExpRectifier\", \"Rectifier\", \"RectifierDropout\", \"MaxoutDropout\", " +
-            "\"Maxout\", \"TanhDropout\", \"Tanh\"";
+            "\"ExpRectifierWithDropout\", \"ExpRectifier\", \"Rectifier\", \"RectifierWithDropout\", \"MaxoutWithDropout\", " +
+            "\"Maxout\", \"TanhWithDropout\", \"Tanh\"";
     // use mod to take care of Maxout networks
     assert (weightLen % (inSize * outSize) == 0) : "Your neural network layer number of input * number " +
             "of outputs should equal length of your weight vector";
@@ -74,19 +74,19 @@ public class NeuralNetwork {  // represent one layer of neural network
         return new LinearOut();
       case "Softmax":
         return new SoftmaxOut();
-      case "ExpRectifierDropout":
+      case "ExpRectifierWithDropout":
         return new ExpRectifierDropoutOut();
       case "ExpRectifier":
         return new ExpRectifierOut();
       case "Rectifier":
         return new RectifierOut();
-      case "RectifierDropout":
+      case "RectifierWithDropout":
         return new RectifierDropoutOut();
-      case "MaxoutDropout":
+      case "MaxoutWithDropout":
         return new MaxoutDropoutOut();
       case "Maxout":
         return new MaxoutOut();
-      case "TanhDropout":
+      case "TanhWithDropout":
         return new TanhDropoutOut();
       case "Tanh":
         return new TanhOut();

@@ -154,7 +154,7 @@ def np_comparison_check(h2o_data, np_data, num_elements):
         assert np.absolute(h2o_val - np_val) < 1e-5, \
             "failed comparison check! h2o computed {0} and numpy computed {1}".format(h2o_val, np_val)
 
-def javapredict(algo, equality, train, test, x, y, compile_only=False, separator=",", setInvNumNA=False, pojo_model=True, **kwargs):
+def javapredict(algo, equality, train, test, x, y, compile_only=False, separator=",", setInvNumNA=False, pojo_model=True, save_model=False, **kwargs):
     print("Creating model in H2O")
     if algo == "gbm": model = H2OGradientBoostingEstimator(**kwargs)
     elif algo == "random_forest": model = H2ORandomForestEstimator(**kwargs)
@@ -182,6 +182,8 @@ def javapredict(algo, equality, train, test, x, y, compile_only=False, separator
         model.download_mojo(path=tmpdir)
         #h2o.download_mojo(model, path=tmpdir)
 
+    if (save_model):
+        h2o.save_model(model, path=tmpdir, force=True)  # save model for later compare
     # only need to compile for pojo
     if (pojo_model):
         h2o_genmodel_jar = os.path.join(tmpdir, "h2o-genmodel.jar")
